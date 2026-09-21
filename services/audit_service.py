@@ -47,8 +47,6 @@ def _services(rows):
         if key in seen:
             continue
         seen.add(key)
-        if str(row.get("status")) != "1":
-            row["error_source"] = row["error_code"] = row["error_desc"] = None
         unique.append(row)
     return unique
 
