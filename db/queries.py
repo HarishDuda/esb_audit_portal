@@ -7,28 +7,38 @@ ACE_COLUMNS = """
 """
 DTL_COLUMNS = "REQREF_NUMBER, LOG_POINT, PAYLOAD, TIMESTAMP"
 
-ACE_RECENT = f"""
+def ace_recent(schema: str) -> str:
+    return f"""
     SELECT {ACE_COLUMNS}
-    FROM ESB_ACE_AUDIT_LOG
+    FROM {schema}.ESB_ACE_AUDIT_LOG
     WHERE TIMESTAMP > (SYSDATE - :days) AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
-DTL_RECENT = f"""
+
+
+def dtl_recent(schema: str) -> str:
+    return f"""
     SELECT {DTL_COLUMNS}
-    FROM ESB_AUDIT_DTL_LOG
+    FROM {schema}.ESB_AUDIT_DTL_LOG
     WHERE TIMESTAMP > (SYSDATE - :days) AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
-ACE_CUSTOM = f"""
+
+
+def ace_custom(schema: str) -> str:
+    return f"""
     SELECT {ACE_COLUMNS}
-    FROM ESB_ACE_AUDIT_LOG
+    FROM {schema}.ESB_ACE_AUDIT_LOG
     WHERE TIMESTAMP >= :from_date AND TIMESTAMP < :to_date
       AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
-DTL_CUSTOM = f"""
+
+
+def dtl_custom(schema: str) -> str:
+    return f"""
     SELECT {DTL_COLUMNS}
-    FROM ESB_AUDIT_DTL_LOG
+    FROM {schema}.ESB_AUDIT_DTL_LOG
     WHERE TIMESTAMP >= :from_date AND TIMESTAMP < :to_date
       AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC

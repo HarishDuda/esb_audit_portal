@@ -1,5 +1,6 @@
 """Application configuration. Database secrets are read only from the environment."""
 import os
+import re
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
@@ -14,6 +15,7 @@ class OracleConfig:
     host: str
     port: int
     service: str
+    schema: str
 
 
 class Config:
@@ -37,7 +39,10 @@ class Config:
             "password": os.getenv(f"{prefix}_DB_PASSWORD", ""),
             "host": os.getenv(f"{prefix}_DB_HOST", ""),
             "service": os.getenv(f"{prefix}_DB_SERVICE", ""),
+            "schema": os.getenv(f"{prefix}_DB_SCHEMA", ""),
         }
         if not all(values.values()):
             raise ValueError("Database environment is not configured")
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_$#]{0,127}", values["schema"]):
+            raise ValueError("Database environment is misconfigured")
         return OracleConfig(port=port, **values)

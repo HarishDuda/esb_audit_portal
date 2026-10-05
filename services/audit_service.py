@@ -57,8 +57,10 @@ def search(data: dict) -> dict:
     logger.info("Audit search initiated: environment=%s rrn=%s", environment, rrn)
     recent = period in RANGE_DAYS
     with connection(settings) as conn:
-        ace_rows = fetch_rows(conn, queries.ACE_RECENT if recent else queries.ACE_CUSTOM, binds)
-        dtl_rows = fetch_rows(conn, queries.DTL_RECENT if recent else queries.DTL_CUSTOM, binds)
+        ace_query = queries.ace_recent(settings.schema) if recent else queries.ace_custom(settings.schema)
+        dtl_query = queries.dtl_recent(settings.schema) if recent else queries.dtl_custom(settings.schema)
+        ace_rows = fetch_rows(conn, ace_query, binds)
+        dtl_rows = fetch_rows(conn, dtl_query, binds)
     logger.info("Audit query completed: environment=%s rrn=%s ace=%d dtl=%d", environment, rrn, len(ace_rows), len(dtl_rows))
     return {
         "success": True, "rrn": rrn, "environment": environment, "range": period,
