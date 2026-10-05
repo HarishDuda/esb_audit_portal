@@ -24,7 +24,7 @@ Open `http://127.0.0.1:5000`.
 
 ## Configuration
 
-`ESB_ENVIRONMENTS` controls the selectable environments. Each comma-separated name needs matching `<ENV>_DB_USER`, `_PASSWORD`, `_HOST`, `_PORT`, `_SERVICE`, and `_SCHEMA` entries. The schema setting is the Oracle owner of `ESB_ACE_AUDIT_LOG` and `ESB_AUDIT_DTL_LOG`; both queries qualify the table names with that schema. Credentials are never returned by the API.
+`ESB_ENVIRONMENTS` controls the selectable environments. Each comma-separated name needs matching `<ENV>_DB_USER`, `_PASSWORD`, `_HOST`, and `_SERVICE` settings; `_PORT` defaults to `1521`. UAT may leave `_SCHEMA` empty to query tables in the connected user's default schema. Other environments, including PREPROD, require `_SCHEMA`, the Oracle owner of `ESB_ACE_AUDIT_LOG` and `ESB_AUDIT_DTL_LOG`. Credentials are never returned by the API.
 
 ## API
 

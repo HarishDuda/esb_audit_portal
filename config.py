@@ -39,10 +39,12 @@ class Config:
             "password": os.getenv(f"{prefix}_DB_PASSWORD", ""),
             "host": os.getenv(f"{prefix}_DB_HOST", ""),
             "service": os.getenv(f"{prefix}_DB_SERVICE", ""),
-            "schema": os.getenv(f"{prefix}_DB_SCHEMA", ""),
         }
         if not all(values.values()):
             raise ValueError("Database environment is not configured")
-        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_$#]{0,127}", values["schema"]):
+        schema = os.getenv(f"{prefix}_DB_SCHEMA", "").strip()
+        if prefix != "UAT" and not schema:
+            raise ValueError("Database environment is not configured")
+        if schema and not re.fullmatch(r"[A-Za-z][A-Za-z0-9_$#]{0,127}", schema):
             raise ValueError("Database environment is misconfigured")
-        return OracleConfig(port=port, **values)
+        return OracleConfig(port=port, schema=schema, **values)
