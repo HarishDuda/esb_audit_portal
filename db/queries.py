@@ -19,7 +19,9 @@ def ace_recent(schema: str) -> str:
     return f"""
     SELECT {ACE_COLUMNS}
     FROM {_table_name(schema, ACE_TABLE)}
-    WHERE TIMESTAMP > (SYSDATE - :days) AND REQREF_NUMBER = :rrn
+    WHERE TIMESTAMP >= TRUNC(SYSDATE) - (:days - 1)
+      AND TIMESTAMP < TRUNC(SYSDATE) + 1
+      AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
 
