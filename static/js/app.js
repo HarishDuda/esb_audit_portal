@@ -26,10 +26,34 @@ function makeCopyButton(label, value) {
   });
   return button;
 }
-function prettyPayload(value) {
+function prettyStructuredText(value) {
   const raw = value == null ? '' : String(value);
   try { return JSON.stringify(JSON.parse(raw), null, 2); } catch (_) {}
-  if (/^\s*</.test(raw)) { try { return new XMLSerializer().serializeToString(new DOMParser().parseFromString(raw, 'application/xml')).replace(/></g, '>\n<'); } catch (_) {} }
+  if (/^\s*</.test(raw)) {
+    const document = new DOMParser().parseFromString(raw, 'application/xml');
+    if (!document.querySelector('parsererror')) {
+      const serializer = new XMLSerializer();
+      function formatElement(element, depth = 0) {
+        const indent = '  '.repeat(depth);
+        const children = Array.from(element.childNodes).filter(
+          child => child.nodeType !== Node.TEXT_NODE || child.textContent.trim()
+        );
+        const hasElements = children.some(child => child.nodeType === Node.ELEMENT_NODE);
+        const hasText = children.some(child => child.nodeType === Node.TEXT_NODE && child.textContent.trim());
+        if (!hasElements || hasText) return `${indent}${serializer.serializeToString(element)}`;
+
+        const opening = serializer.serializeToString(element.cloneNode(false)).replace(/\/>$/, '>');
+        if (!children.length) return `${indent}${serializer.serializeToString(element)}`;
+        const formattedChildren = children.map(child => child.nodeType === Node.ELEMENT_NODE
+          ? formatElement(child, depth + 1)
+          : `${'  '.repeat(depth + 1)}${serializer.serializeToString(child).trim()}`);
+        return `${indent}${opening}\n${formattedChildren.join('\n')}\n${indent}</${element.tagName}>`;
+      }
+
+      const declaration = raw.match(/^\s*(<\?xml\b[^?]*\?>)/i)?.[1];
+      return [declaration, formatElement(document.documentElement)].filter(Boolean).join('\n');
+    }
+  }
   return raw;
 }
 function render(data) {
@@ -43,10 +67,11 @@ function render(data) {
       const detail = document.createElement('article'); detail.className = 'error-detail';
       const titleRow = document.createElement('div'); titleRow.className = 'error-detail-header';
       const heading = node('h3', text(item.service_name), 'error-detail-title');
-      titleRow.append(heading, makeCopyButton('Copy error', String(item.error_desc)));
+      const formattedError = prettyStructuredText(item.error_desc);
+      titleRow.append(heading, makeCopyButton('Copy error', formattedError));
       const url = node('p', text(item.url), 'error-detail-meta');
       const meta = node('p', `Status ${text(item.status)} · ${text(item.error_source)} · ${text(item.error_code)}`, 'error-detail-meta');
-      const description = node('p', String(item.error_desc), 'error-detail-description');
+      const description = node('pre', formattedError, 'error-detail-description');
       detail.append(titleRow, url, meta, description); errorDetails.append(detail);
     }
   });
@@ -62,8 +87,8 @@ function render(data) {
     payload.open = true;
     const summary = document.createElement('summary');
     summary.className = 'payload-summary';
-    summary.append(node('span', 'Payload'), makeCopyButton('Copy', prettyPayload(item.payload)));
-    payload.append(summary, node('pre', prettyPayload(item.payload)));
+    summary.append(node('span', 'Payload'), makeCopyButton('Copy', prettyStructuredText(item.payload)));
+    payload.append(summary, node('pre', prettyStructuredText(item.payload)));
     entry.append(payload);
     timeline.append(entry);
   });
