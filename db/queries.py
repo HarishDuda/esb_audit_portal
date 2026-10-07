@@ -3,6 +3,7 @@
 # ESB ACE records must come from ESB_ACE_AUDIT_LOG; DTL records come from ESB_AUDIT_DTL_LOG.
 ACE_TABLE = "ESB_ACE_AUDIT_LOG"
 DTL_TABLE = "ESB_AUDIT_DTL_LOG"
+
 ACE_COLUMNS = """
     REQREF_NUMBER, SERVICE_NAME, URL, STATUS, ERROR_SOURCE,
     ERROR_CODE, ERROR_DESC, TIMESTAMP
@@ -17,7 +18,7 @@ def _table_name(schema: str, table: str) -> str:
 def ace_recent(schema: str) -> str:
     return f"""
     SELECT {ACE_COLUMNS}
-    FROM {_table_name(schema, "ACE_TABLE)}
+    FROM {_table_name(schema, ACE_TABLE)}
     WHERE TIMESTAMP > (SYSDATE - :days) AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
@@ -26,7 +27,7 @@ def ace_recent(schema: str) -> str:
 def dtl_recent(schema: str) -> str:
     return f"""
     SELECT {DTL_COLUMNS}
-    FROM {_table_name(schema, "DTL_TABLE)}
+    FROM {_table_name(schema, DTL_TABLE)}
     WHERE TIMESTAMP > (SYSDATE - :days) AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
@@ -35,7 +36,7 @@ def dtl_recent(schema: str) -> str:
 def ace_custom(schema: str) -> str:
     return f"""
     SELECT {ACE_COLUMNS}
-    FROM {_table_name(schema, "ESB_ACE_AUDIT_LOG")}
+    FROM {_table_name(schema, ACE_TABLE)}
     WHERE TIMESTAMP >= :from_date AND TIMESTAMP < :to_date
       AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
@@ -45,7 +46,7 @@ def ace_custom(schema: str) -> str:
 def dtl_custom(schema: str) -> str:
     return f"""
     SELECT {DTL_COLUMNS}
-    FROM {_table_name(schema, "ESB_AUDIT_DTL_LOG")}
+    FROM {_table_name(schema, DTL_TABLE)}
     WHERE TIMESTAMP >= :from_date AND TIMESTAMP < :to_date
       AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
