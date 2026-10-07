@@ -15,7 +15,7 @@ def _table_name(schema: str, table: str) -> str:
 def ace_recent(schema: str) -> str:
     return f"""
     SELECT {ACE_COLUMNS}
-    FROM {_table_name(schema, "ESB_AUDIT_LOG")}
+    FROM {_table_name(schema, "ESB_ACE_AUDIT_LOG")}
     WHERE TIMESTAMP > (SYSDATE - :days) AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
 """
@@ -33,7 +33,7 @@ def dtl_recent(schema: str) -> str:
 def ace_custom(schema: str) -> str:
     return f"""
     SELECT {ACE_COLUMNS}
-    FROM {_table_name(schema, "ESB_AUDIT_LOG")}
+    FROM {_table_name(schema, "ESB_ACE_AUDIT_LOG")}
     WHERE TIMESTAMP >= :from_date AND TIMESTAMP < :to_date
       AND REQREF_NUMBER = :rrn
     ORDER BY TIMESTAMP ASC
