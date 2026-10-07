@@ -20,9 +20,10 @@ function render(data) {
     if (item.error_desc !== null && item.error_desc !== undefined && String(item.error_desc).trim()) {
       const detail = document.createElement('article'); detail.className = 'error-detail';
       const heading = node('h3', text(item.service_name), 'error-detail-title');
+      const url = node('p', text(item.url), 'error-detail-meta');
       const meta = node('p', `Status ${text(item.status)} · ${text(item.error_source)} · ${text(item.error_code)}`, 'error-detail-meta');
       const description = node('p', String(item.error_desc), 'error-detail-description');
-      detail.append(heading, meta, description); errorDetails.append(detail);
+      detail.append(heading, url, meta, description); errorDetails.append(detail);
     }
   });
   $('services-empty').classList.toggle('d-none', data.services.length !== 0);
