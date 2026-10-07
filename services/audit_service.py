@@ -7,7 +7,7 @@ from db import queries
 
 logger = logging.getLogger(__name__)
 
-RANGE_DAYS = {"today": 1, "3_days": 3, "7_days": 7}
+RANGE_DAYS = {"today": 1, "3_days": 3, "7_days": 7, "30_days": 30}
 
 
 class InputError(ValueError):
