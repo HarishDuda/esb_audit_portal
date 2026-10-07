@@ -56,6 +56,25 @@ function prettyStructuredText(value) {
   }
   return raw;
 }
+function prettyErrorDescription(value) {
+  const raw = value == null ? '' : String(value);
+  if (/^\s*</.test(raw)) {
+    const document = new DOMParser().parseFromString(raw, 'application/xml');
+    if (!document.querySelector('parsererror')) {
+      const elements = Array.from(document.getElementsByTagName('*'));
+      const recoverableExceptions = elements.filter(
+        element => element.localName.toLowerCase() === 'recoverableexception'
+      );
+      const lastRecoverableException = recoverableExceptions[recoverableExceptions.length - 1];
+      if (lastRecoverableException) {
+        const userException = Array.from(lastRecoverableException.getElementsByTagName('*'))
+          .find(element => element.localName.toLowerCase() === 'userexception');
+        if (userException) return prettyStructuredText(new XMLSerializer().serializeToString(userException));
+      }
+    }
+  }
+  return prettyStructuredText(raw);
+}
 function render(data) {
   $('summary-rrn').textContent = data.rrn; $('summary-environment').textContent = data.environment;
   $('summary-ace').textContent = data.summary.ace_records; $('summary-dtl').textContent = data.summary.dtl_records;
@@ -67,7 +86,7 @@ function render(data) {
       const detail = document.createElement('article'); detail.className = 'error-detail';
       const titleRow = document.createElement('div'); titleRow.className = 'error-detail-header';
       const heading = node('h3', text(item.service_name), 'error-detail-title');
-      const formattedError = prettyStructuredText(item.error_desc);
+      const formattedError = prettyErrorDescription(item.error_desc);
       titleRow.append(heading, makeCopyButton('Copy error', formattedError));
       const url = node('p', text(item.url), 'error-detail-meta');
       const meta = node('p', `Status ${text(item.status)} · ${text(item.error_source)} · ${text(item.error_code)}`, 'error-detail-meta');
