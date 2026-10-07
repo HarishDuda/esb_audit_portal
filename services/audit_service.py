@@ -40,17 +40,6 @@ def _validate(data: dict):
     return rrn, environment, period, {"rrn": rrn, "from_date": start, "to_date": end}
 
 
-def _services(rows):
-    unique, seen = [], set()
-    for row in rows:
-        key = (row.get("service_name"), row.get("url"))
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(row)
-    return unique
-
-
 def search(data: dict) -> dict:
     rrn, environment, period, binds = _validate(data)
     settings = Config.oracle_config(environment)
@@ -65,5 +54,5 @@ def search(data: dict) -> dict:
     return {
         "success": True, "rrn": rrn, "environment": environment, "range": period,
         "summary": {"ace_records": len(ace_rows), "dtl_records": len(dtl_rows)},
-        "services": _services(ace_rows), "audit_timeline": dtl_rows,
+        "services": ace_rows, "audit_timeline": dtl_rows,
     }
